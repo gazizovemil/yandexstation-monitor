@@ -1,0 +1,31 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Syntax check
+        run: python -m py_compile monitor.py
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Verify no secrets are tracked
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)(data/|\.station_music_token$|\.iot_view_token$|\.session_id$|config\.json$|plug\.json$|\.env$)'; then
+            echo 'ERROR: tracked credential/config file' >&2
+            exit 1
+          fi

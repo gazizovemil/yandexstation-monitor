@@ -1,0 +1,244 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<zabbix_export>
+  <version>8.2</version>
+  <template_groups>
+    <template_group>
+      <uuid>14006b857bfa4c62a3ba366a2defc330</uuid>
+      <name>Templates/Yandex</name>
+    </template_group>
+  </template_groups>
+  <templates>
+    <template>
+      <uuid>69aa2af8347a4d76809981b5d4fa5291</uuid>
+      <template>Yandex Station Mini 2 by Glagol</template>
+      <name>Yandex Station Mini 2 by Glagol</name>
+      <description>Опциональный шаблон, только если шаблон станции ЕЩЁ НЕ импортирован. Сетевые проверки работают независимо от Glagol. JSON траппер получает данные от того же Docker-контейнера. Не заменяй им уже установленный шаблон без необходимости.</description>
+      <groups>
+        <group>
+          <name>Templates/Yandex</name>
+        </group>
+      </groups>
+      <items>
+        <item>
+          <uuid>276d96e6cb5741f18cf34b24aef65566</uuid>
+          <name>ICMP ping</name>
+          <type>SIMPLE</type>
+          <key>icmpping</key>
+          <delay>1m</delay>
+          <triggers>
+            <trigger>
+              <uuid>377b15c1dbea4f35912234bc32e24de0</uuid>
+              <expression>max(/Yandex Station Mini 2 by Glagol/icmpping,3m)=0</expression>
+              <name>Яндекс Станция: нет ответа ICMP</name>
+              <priority>HIGH</priority>
+            </trigger>
+          </triggers>
+        </item>
+        <item>
+          <uuid>d2fbcf53a1f642a5886b5834dcb1ab27</uuid>
+          <name>ICMP latency</name>
+          <type>SIMPLE</type>
+          <key>icmppingsec</key>
+          <delay>1m</delay>
+          <value_type>FLOAT</value_type>
+          <units>s</units>
+        </item>
+        <item>
+          <uuid>d8dba76bcc1840dd8a9c3632ace940a6</uuid>
+          <name>ICMP packet loss</name>
+          <type>SIMPLE</type>
+          <key>icmppingloss</key>
+          <delay>1m</delay>
+          <value_type>FLOAT</value_type>
+          <units>%</units>
+        </item>
+        <item>
+          <uuid>e293b4d3b5944fc99a005d55405984a1</uuid>
+          <name>Glagol TCP port 1961</name>
+          <type>SIMPLE</type>
+          <key>net.tcp.service[tcp,{HOST.CONN},1961]</key>
+          <delay>1m</delay>
+          <triggers>
+            <trigger>
+              <uuid>6b9632bf9ec343f3a5cb711d640a6d21</uuid>
+              <expression>max(/Yandex Station Mini 2 by Glagol/net.tcp.service[tcp,{HOST.CONN},1961],3m)=0</expression>
+              <name>Яндекс Станция: порт Glagol 1961 не отвечает</name>
+              <priority>WARNING</priority>
+            </trigger>
+          </triggers>
+        </item>
+        <item>
+          <uuid>8cdce6c3eeef48c68122092493b8df40</uuid>
+          <name>Glagol state JSON</name>
+          <type>TRAP</type>
+          <key>yandex.station.state</key>
+          <delay>0</delay>
+          <history>7d</history>
+          <value_type>TEXT</value_type>
+        </item>
+        <item>
+          <uuid>87d6fb25a2824448b1b5f61962a96a0f</uuid>
+          <name>Станция: Glagol работает</name>
+          <type>DEPENDENT</type>
+          <key>yandex.station.ok</key>
+          <delay>0</delay>
+          <value_type>UNSIGNED</value_type>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.ok</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.station.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>faaece784b024cd8825c1358b6317e3a</uuid>
+          <name>Станция: громкость</name>
+          <type>DEPENDENT</type>
+          <key>yandex.station.volume</key>
+          <delay>0</delay>
+          <value_type>UNSIGNED</value_type>
+          <units>%</units>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.volume</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.station.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>5f7010995adb4fd5838786844a67e6e8</uuid>
+          <name>Станция: музыка играет</name>
+          <type>DEPENDENT</type>
+          <key>yandex.station.playing</key>
+          <delay>0</delay>
+          <value_type>UNSIGNED</value_type>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.playing</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.station.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>f4f21d42ef304e67b0f7096af5d8b5c3</uuid>
+          <name>Станция: трек</name>
+          <type>DEPENDENT</type>
+          <key>yandex.station.title</key>
+          <delay>0</delay>
+          <value_type>CHAR</value_type>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.title</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.station.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>4fa06ad881574f52b3f06a31a4f9e0e9</uuid>
+          <name>Станция: исполнитель</name>
+          <type>DEPENDENT</type>
+          <key>yandex.station.artist</key>
+          <delay>0</delay>
+          <value_type>CHAR</value_type>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.artist</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.station.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>9f2276da5fbb4d35ae1835108b7ae4b0</uuid>
+          <name>Станция: тип воспроизведения</name>
+          <type>DEPENDENT</type>
+          <key>yandex.station.player_type</key>
+          <delay>0</delay>
+          <value_type>CHAR</value_type>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.player_type</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.station.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>2642461d144048b284b30be04422244e</uuid>
+          <name>Станция: состояние Алисы</name>
+          <type>DEPENDENT</type>
+          <key>yandex.station.alice_state</key>
+          <delay>0</delay>
+          <value_type>CHAR</value_type>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.alice_state</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.station.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>cb4909b02f5d4ed9a7f8ccc699ed5f4e</uuid>
+          <name>Станция: последний опрос</name>
+          <type>DEPENDENT</type>
+          <key>yandex.station.timestamp</key>
+          <delay>0</delay>
+          <value_type>UNSIGNED</value_type>
+          <units>unixtime</units>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.timestamp</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.station.state</key>
+          </master_item>
+        </item>
+      </items>
+    </template>
+  </templates>
+</zabbix_export>

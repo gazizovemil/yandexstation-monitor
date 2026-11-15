@@ -1,0 +1,22 @@
+# DEVELOPMENT ONLY: don't run this alongside the live Portainer stack.
+# Production: use deploy/portainer-stack.yml and the current /data bind mount.
+services:
+  yandexstation-monitor-dev:
+    build: .
+    image: yandexstation-monitor:dev
+    container_name: yandexstation-monitor-dev
+    restart: "no"
+    network_mode: host
+    init: true
+    read_only: true
+    volumes:
+      - ./data:/data:rw
+    tmpfs:
+      - /tmp:size=16m
+    environment:
+      TZ: Asia/Almaty
+      YANDEX_MONITOR_DATA_DIR: /data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

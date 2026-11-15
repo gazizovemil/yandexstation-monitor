@@ -1,0 +1,4 @@
+# Whitelist-only build context: prevents any local secrets from entering an image.
+*
+!Dockerfile
+!monitor.py

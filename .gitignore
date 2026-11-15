@@ -1,0 +1,25 @@
+# Never commit account credentials or device configuration.
+data/
+**/data/
+.env
+.env.*
+!.env.example
+*.token
+*.key
+*secret*
+.session_id
+.station_music_token
+.iot_view_token
+config.json
+plug.json
+*.bak
+*.log
+*.py[cod]
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+*.zip

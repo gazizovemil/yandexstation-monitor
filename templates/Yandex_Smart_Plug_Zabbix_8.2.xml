@@ -1,0 +1,237 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<zabbix_export>
+  <version>8.2</version>
+  <template_groups>
+    <template_group>
+      <uuid>14006b857bfa4c62a3ba366a2defc330</uuid>
+      <name>Templates/Yandex</name>
+    </template_group>
+  </template_groups>
+  <templates>
+    <template>
+      <uuid>1c2181d558d641ff89132d2c75632b91</uuid>
+      <template>Yandex Smart Plug by Cloud API</template>
+      <name>Yandex Smart Plug by Cloud API</name>
+      <description>Чтение состояния розетки Яндекса через официальный IoT API (OAuth iot:view). Данные отправляет один Docker-контейнер вместе с мониторингом Станции. Имя хоста Zabbix по умолчанию Yandex Smart Plug. Нет необходимости создавать Agent/SNMP-интерфейс. Измерения мощности/напряжения/тока могут быть недоступны конкретной модели.</description>
+      <groups>
+        <group>
+          <name>Templates/Yandex</name>
+        </group>
+      </groups>
+      <items>
+        <item>
+          <uuid>edc3ba9acb504d0a8752581c1962fc72</uuid>
+          <name>Розетка: состояние JSON</name>
+          <type>TRAP</type>
+          <key>yandex.plug.state</key>
+          <delay>0</delay>
+          <history>7d</history>
+          <value_type>TEXT</value_type>
+          <description>Главный Zabbix trapper. JSON присылает контейнер monitor.py.</description>
+          <triggers>
+            <trigger>
+              <uuid>a850dc5ce4d7452292ec6c7685268090</uuid>
+              <expression>nodata(/Yandex Smart Plug by Cloud API/yandex.plug.state,20m)=1</expression>
+              <name>Яндекс: данные розетки не поступают 20 минут</name>
+              <priority>AVERAGE</priority>
+              <status>DISABLED</status>
+            </trigger>
+          </triggers>
+        </item>
+        <item>
+          <uuid>888bf585f0fd4eab953dfbf2c1e1026b</uuid>
+          <name>Розетка: онлайн</name>
+          <type>DEPENDENT</type>
+          <key>yandex.plug.online</key>
+          <delay>0</delay>
+          <value_type>UNSIGNED</value_type>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.online</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.plug.state</key>
+          </master_item>
+          <triggers>
+            <trigger>
+              <uuid>584e999dc1d7450e966ebd57497f3849</uuid>
+              <expression>max(/Yandex Smart Plug by Cloud API/yandex.plug.online,10m)=0</expression>
+              <name>Яндекс: розетка недоступна более 10 минут</name>
+              <priority>WARNING</priority>
+            </trigger>
+          </triggers>
+        </item>
+        <item>
+          <uuid>38b6f75ee7f04860b4841fc4ab8a6074</uuid>
+          <name>Розетка: питание включено (1/0)</name>
+          <type>DEPENDENT</type>
+          <key>yandex.plug.on</key>
+          <delay>0</delay>
+          <value_type>UNSIGNED</value_type>
+          <description>При offline значение не обновляется: смотри отдельно Онлайн.</description>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.on</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.plug.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>8100adaf5fc849f88756d9d4aa37efbc</uuid>
+          <name>Розетка: имя</name>
+          <type>DEPENDENT</type>
+          <key>yandex.plug.name</key>
+          <delay>0</delay>
+          <value_type>CHAR</value_type>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.name</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.plug.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>8c93cf7b37554484ba4b7cb9d2e6251d</uuid>
+          <name>Розетка: время последнего успешного опроса</name>
+          <type>DEPENDENT</type>
+          <key>yandex.plug.timestamp</key>
+          <delay>0</delay>
+          <value_type>UNSIGNED</value_type>
+          <units>unixtime</units>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.timestamp</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.plug.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>9bae7e65da34431d94ed4c3f550b877c</uuid>
+          <name>Розетка: мощность</name>
+          <type>DEPENDENT</type>
+          <key>yandex.plug.power</key>
+          <delay>0</delay>
+          <value_type>FLOAT</value_type>
+          <units>W</units>
+          <description>Только если устройство предоставляет соответствующий показатель через официальный API.</description>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.power_w</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.plug.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>bdc8829b1ab446e082d732b368042ccf</uuid>
+          <name>Розетка: напряжение</name>
+          <type>DEPENDENT</type>
+          <key>yandex.plug.voltage</key>
+          <delay>0</delay>
+          <value_type>FLOAT</value_type>
+          <units>V</units>
+          <description>Только если устройство предоставляет соответствующий показатель через официальный API.</description>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.voltage_v</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.plug.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>bfae76d5c5cd4877b8cad471a35f9ad7</uuid>
+          <name>Розетка: сила тока</name>
+          <type>DEPENDENT</type>
+          <key>yandex.plug.current</key>
+          <delay>0</delay>
+          <value_type>FLOAT</value_type>
+          <units>A</units>
+          <description>Только если устройство предоставляет соответствующий показатель через официальный API.</description>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.current_a</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.plug.state</key>
+          </master_item>
+        </item>
+        <item>
+          <uuid>d75e436484c54365960bb02cce540d07</uuid>
+          <name>Розетка: накопленное потребление энергии</name>
+          <type>DEPENDENT</type>
+          <key>yandex.plug.energy</key>
+          <delay>0</delay>
+          <value_type>FLOAT</value_type>
+          <units>kWh</units>
+          <description>Только если устройство предоставляет соответствующий показатель через официальный API.</description>
+          <preprocessing>
+            <step>
+              <type>JSONPATH</type>
+              <parameters>
+                <parameter>$.energy_kwh</parameter>
+              </parameters>
+              <error_handler>DISCARD_VALUE</error_handler>
+            </step>
+          </preprocessing>
+          <master_item>
+            <key>yandex.plug.state</key>
+          </master_item>
+        </item>
+      </items>
+    </template>
+  </templates>
+  <graphs>
+    <graph>
+      <uuid>13643644e9c44855be706496188df2d7</uuid>
+      <name>Яндекс: мощность розетки</name>
+      <graph_items>
+        <graph_item>
+          <color>33AA77</color>
+          <item>
+            <host>Yandex Smart Plug by Cloud API</host>
+            <key>yandex.plug.power</key>
+          </item>
+        </graph_item>
+      </graph_items>
+    </graph>
+  </graphs>
+</zabbix_export>

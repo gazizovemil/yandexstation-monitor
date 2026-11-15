@@ -1,0 +1,21 @@
+# Production Portainer stack for the TerraMaster TNAS used in this project.
+# Do NOT start a second stack when the old yandexstation-monitor is still running.
+services:
+  yandexstation-monitor:
+    image: gazizovemil/yandexstation-monitor:1.0.1
+    container_name: yandexstation-monitor
+    restart: unless-stopped
+    network_mode: host
+    init: true
+    read_only: true
+    volumes:
+      - /Volume1/docker/yandexstation-monitor/data:/data:rw
+    tmpfs:
+      - /tmp:size=16m
+    environment:
+      TZ: Asia/Almaty
+      YANDEX_MONITOR_DATA_DIR: /data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
